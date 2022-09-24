@@ -1,10 +1,13 @@
 const express = require("express");
 require("dotenv").config();
 const path = require("path");
-const members = require("./Members");
 const logger = require("./middleware/logger");
 
 const app = express();
+
+//body parser middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 //init middleware
 // app.use(logger);
@@ -18,23 +21,9 @@ const app = express();
 //automatically routes are created for html files in static folder , css is also supported
 app.use(express.static(path.join(__dirname, "public")));
 
-//get all members
-app.get("/api/members", (req, res) => {
-  res.json(members); //no need to even strigify
-});
+//members api routes
+app.use("/api/members", require("./routes/api/members"));
 
-//get single member
-app.get("/api/members/:id", (req, res) => {
-  //:id is url parameter
-  const found = members.some((member) => member.id === parseInt(req.params.id)); //normal js method
-  if (found) {
-    res.json(members.filter((member) => member.id === parseInt(req.params.id)));
-  } else {
-    res.status(400).json({ msg: `Member ${req.params.id} not found` });
-  }
-});
-
-//
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
